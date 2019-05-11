@@ -95,7 +95,7 @@ async function obtenerCatalogo(req, res) {
                         '"nombre": "' + element.nombre +
                         '",\n"sku": "' + element.SKU +
                         '",\n"categorias":[' + categoriasProductos + ']' +
-                        ',\n"activo":' + state +
+                        ',\n"activo":' + element.estado +
                         '\n}';
                     if (index != results.length - 1) {
                         jsonProductos = jsonProductos + ',\n';
@@ -207,7 +207,7 @@ function enriquecerProducto(req, res) {
                         '",\n"descripcion_larga": "' + element.nombre +
                         '",\n"imagenes":[' + ImgProductos + ']' +
                         ',\n"categorias":[' + categoriasProductos + ']' +
-                        ',\n"activo":' + state +
+                        ',\n"activo":' + element.estado +
                         '\n}';
                     if (index != results.length - 1) {
                         jsonProductos = jsonProductos + ',\n';

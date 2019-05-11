@@ -23,6 +23,8 @@ let checkToken = (req, res, next) => {
         var scopes = scope.split(',');
         var x =0;
         scopes.forEach(function (element) {
+          console.log(element);
+          console.log(req.header('scope'));
           if(req.header('scope')==element)
           {
             next();
