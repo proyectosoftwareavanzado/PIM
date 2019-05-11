@@ -2,7 +2,7 @@
 var getlorem = require('getlorem');
 const conn = require('../connect').connection;
 const conn2 = require('../connect').connection;
-var miCategoria = 0;
+var miCategoria = 1;
 var nuevosProductos = 25;
 var nuevasCategorias =10;
 var cambioPeriodo = 1;
@@ -284,8 +284,8 @@ async function recargarProductos(req, res) {
     let insertProductos='';
     for (let index = 0; index < vecProc.length; index++) {
         const element = vecProc[index];
-        insertProductos = insertProductos+'(\''+vecProc[index]+'\','+vecProc[index]+Date.now()+','+(Math.random() * (500.99 - 5.00) + 5.00).toFixed(2)+
-                            ',\''+getlorem.sentences(1)+'\',\''+getlorem.sentences(5)+'\',1';
+        insertProductos = insertProductos+"('"+vecProc[index]+"','"+vecProc[index]+Date.now()+"',"+(Math.random() * (500.99 - 5.00) + 5.00).toFixed(2)+
+                        ",'"+vecProc[index]+" caracteristicas','"+vecProc[index]+" caracteristicas',1";
         if (index!=vecProc.length-1) {
             insertProductos = insertProductos + '),';
         }else{
@@ -294,18 +294,6 @@ async function recargarProductos(req, res) {
         nuevosProductos++;
         vecNumProductos[index] = nuevosProductos;
     }
-    let prueba = '';
-    for (let index = 0; index < 25; index++) {
-        const element = vecProc[index];
-        prueba = prueba+'(producto'+index+','+'producto'+index+Date.now()+','+(Math.random() * (500.99 - 5.00) + 5.00).toFixed(2)+
-                            ','+getlorem.sentences(1)+','+getlorem.sentences(5)+',1';
-        if (index!=25-1) {
-            prueba = prueba + '),\n';
-        }else{
-            prueba = prueba + ')\n';
-        }
-    }
-    console.log(prueba);
 	var cats = getlorem.words(2);
 	cats = cats.replace('.', '').replace(',','');
 	var vecCats = cats.split(' ');
@@ -313,9 +301,7 @@ async function recargarProductos(req, res) {
     
     for (let index = 0; index < vecCats.length; index++) {
         const element = vecCats[index];
-        insertCategoria = insertCategoria +'('+vecCats[index]+','+getlorem.sentences(2),+','+(miCategoria+index);
-        miCategoria++;
-        if(miCategoria=>10) miCategoria=0;
+        insertCategoria = insertCategoria +"('"+vecCats[index]+"','"+vecCats[index]+" descripcion',5";
         if (index!=vecCats.length-1) {
             insertCategoria = insertCategoria + '),';
         }else{
@@ -329,7 +315,7 @@ async function recargarProductos(req, res) {
     for (let index = 0; index < vecProc.length; index++) {
         const element = vecProc[index];
         insertCategoriaProducto = insertCategoriaProducto + '('+ vecNumProductos[index]+','+vecNumCategorias[0];
-        insertImagenes = insertImagenes + '('+'ruta'+vecNumProductos[index]+','+vecNumProductos[index];
+        insertImagenes = insertImagenes + '('+"'ruta"+vecNumProductos[index]+"',"+vecNumProductos[index];
         if (index!=vecProc.length-1) {
             insertCategoriaProducto = insertCategoriaProducto + '),';
             insertImagenes = insertImagenes + '),';
@@ -338,6 +324,7 @@ async function recargarProductos(req, res) {
             insertImagenes = insertImagenes + ')';
         }
     }
+    console.log(insertCategoria);
     conn.query('INSERT INTO Producto(nombre,sku,precioLista,caracteristicas,descripcion,estado) VALUES'+insertProductos+';', function (error, results, fields) {
         if (error) {
             console.log(error);
@@ -348,17 +335,17 @@ async function recargarProductos(req, res) {
                 console.log(error2);
                 res.jsonp({ error2: 'Error de conexión a la base de datos.' })
             }
-            conn.query('INSERT INTO Categoria(nombre,descripcion,idPadre) VALUES'+insertCategoriaProducto+';', function (error3, results3, fields) {
+            conn.query('INSERT INTO CategoriaProducto(idProducto,idCategoria) VALUES'+insertCategoriaProducto+';', function (error3, results3, fields) {
                 if (error2) {
                     console.log(error2);
                     res.jsonp({ error2: 'Error de conexión a la base de datos.' })
                 }
-                conn.query('INSERT INTO ProductoImagen(ruta,idProducto) VALUES'+insertCategoriaProducto+';', function (error4, results4, fields) {
+                conn.query('INSERT INTO ProductoImagen(ruta,idProducto) VALUES'+insertImagenes+';', function (error4, results4, fields) {
                     if (error4) {
                         console.log(error4);
                         res.jsonp({ error4: 'Error de conexión a la base de datos.' })
                     }
-                    
+                   res.jsonp("Todo lo ingreso a la bd"); 
                 });
             });
         });
