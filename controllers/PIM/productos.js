@@ -6,7 +6,7 @@ var miCategoria = 1;
 var nuevosProductos = 25;
 var nuevasCategorias =10;
 var cambioPeriodo = 1;
-var reporte1 = 0;
+var reporte1 = 25;
 var reporte2 = 0;
 var reporte3 = 0;
 /**
@@ -54,9 +54,9 @@ async function obtenerCatalogo(req, res) {
                         '"id": ' + element.idCategoria +
                         ',\n"nombre": "' + element.nombre + '"' +
                         ',\n"padre": ' + element.idPadre +
-                        '\n}';
-                    if (index != resultsCat.length - 1) {
-                        jsonCategorias = jsonCategorias + ',\n';
+                        '\n}';reporte1
+                    if (index != resureporte1ltsCat.length - 1) {
+                        jsonCategoriareporte1s = jsonCategorias + ',\n';
                     } else {
                         jsonCategorias = jsonCategorias + '\n';
                     }
@@ -130,7 +130,7 @@ function enriquecerProducto(req, res) {
         } else {
             skusCade = skusCade + "'" + element + "'";
         }
-        reporte2++;
+        reporte3++;
     }
     //console.log(skusCade);
     conn.query('SELECT * FROM Producto WHERE SKU IN(' + skusCade + ');', function (error, results, fields) {
@@ -345,6 +345,7 @@ async function recargarProductos(req, res) {
                         console.log(error4);
                         res.jsonp({ error4: 'Error de conexión a la base de datos.' })
                     }
+                    reporte1=reporte1+5;
                    res.jsonp("Todo lo ingreso a la bd"); 
                 });
             });
