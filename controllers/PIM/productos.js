@@ -1,8 +1,10 @@
 'use strict'
-
+var getlorem = require('getlorem');
 const conn = require('../connect').connection;
 const conn2 = require('../connect').connection;
-
+var miCategoria = 0;
+var nuevosProductos = 25;
+var nuevasCategorias =10;
 var cambioPeriodo = 1;
 var reporte1 = 0;
 var reporte2 = 0;
@@ -273,66 +275,100 @@ async function truncarReporte(req, res) {
         res.jsonp("Se trunco la tabla reporte");
     });
 }
-async function nose(req, res) {
-    periodo++;
+async function recargarProductos(req, res) {
+    let vecNumCategorias =[];
+    let vecNumProductos = [];
 	var procs = getlorem.words(5);
 	procs = procs.replace('.','').replace(',','');
 	var vecProc = procs.split(' ');
-	
+    let insertProductos='';
+    for (let index = 0; index < vecProc.length; index++) {
+        const element = vecProc[index];
+        insertProductos = insertProductos+'(\''+vecProc[index]+'\','+vecProc[index]+Date.now()+','+(Math.random() * (500.99 - 5.00) + 5.00).toFixed(2)+
+                            ',\''+getlorem.sentences(1)+'\',\''+getlorem.sentences(5)+'\',1';
+        if (index!=vecProc.length-1) {
+            insertProductos = insertProductos + '),';
+        }else{
+            insertProductos = insertProductos + ')';
+        }
+        nuevosProductos++;
+        vecNumProductos[index] = nuevosProductos;
+    }
+    let prueba = '';
+    for (let index = 0; index < 25; index++) {
+        const element = vecProc[index];
+        prueba = prueba+'(producto'+index+','+'producto'+index+Date.now()+','+(Math.random() * (500.99 - 5.00) + 5.00).toFixed(2)+
+                            ','+getlorem.sentences(1)+','+getlorem.sentences(5)+',1';
+        if (index!=25-1) {
+            prueba = prueba + '),\n';
+        }else{
+            prueba = prueba + ')\n';
+        }
+    }
+    console.log(prueba);
 	var cats = getlorem.words(2);
 	cats = cats.replace('.', '').replace(',','');
 	var vecCats = cats.split(' ');
-
-	var indexC = 1;
-	var indexP = 1;
-	var sql = "";
-	var catIndex = [];
-	console.log('acomensar, indiceCat en: '+indexC);
-	vecCats.forEach((categoria)=>{
-		sql = "INSERT INTO 'category'('id','name`) VALUES (?,?)";
-		idCategoria++;
-		connection.query(sql, [idCategoria,categoria], function(error, results){
-			catIndex.push(idCategoria);
-			console.log('idCategori actual: '+idCategoria);
-			console.log('Indece: '+indexC+', tam vec: '+vecCats.length);
-			if(indexC == vecCats.length){
-				console.log('Entro a generar productos');
-				vecProc.forEach((producto)=>{
-					sql = "INSERT INTO `product`(`sku`, `name`, `price`, `short_description`, `long_description`) VALUES (?,?,?,?,?)";
-					var datos = [
-						producto+'-'+Date.now(),
-						producto,
-						(Math.random() * (500.99 - 5.00) + 5.00).toFixed(2),
-						getlorem.sentences(1),
-						getlorem.sentences(5)
-					];
-					console.log('crear producto index: '+indexP+', tamvec: '+vecProc.length);
-					connection.query(sql, datos, function(error, results){
-						sql = "INSERT INTO `product_category`(`productSku`, `categoryId`) VALUES (?,?)";
-						connection.query(sql, [datos[0], 5], function(error, results){
-							sql = "INSERT INTO `image`(`url`, `productSku`) VALUES (?,?)";
-							connection.query(sql, ['http://'+getlorem.words(1)+'com',datos[0]], function(error, results){
-								if(indexP == vecProc.length){
-									sql = "INSERT INTO `historial`(`periodo`,`tipo`) VALUES (?,?)";
-									connection.query(sql, [periodo, tipos.producto], function(error, results){
-										console.log('Fin de registro de nuevos productos, cambio de periodo');
-										res.send('Cambio de periodo realizado xD');
-									});
-								}
-								indexP++;
-							});
-						});
-					});
-				});
-			}
-			indexC++;
-		});
-	});
+    let insertCategoria='';
+    
+    for (let index = 0; index < vecCats.length; index++) {
+        const element = vecCats[index];
+        insertCategoria = insertCategoria +'('+vecCats[index]+','+getlorem.sentences(2),+','+(miCategoria+index);
+        miCategoria++;
+        if(miCategoria=>10) miCategoria=0;
+        if (index!=vecCats.length-1) {
+            insertCategoria = insertCategoria + '),';
+        }else{
+            insertCategoria = insertCategoria + ')';
+        }
+        nuevasCategorias++;
+        vecNumCategorias[index]=nuevasCategorias;
+    }
+    let insertCategoriaProducto = '';
+    let insertImagenes = '';
+    for (let index = 0; index < vecProc.length; index++) {
+        const element = vecProc[index];
+        insertCategoriaProducto = insertCategoriaProducto + '('+ vecNumProductos[index]+','+vecNumCategorias[0];
+        insertImagenes = insertImagenes + '('+'ruta'+vecNumProductos[index]+','+vecNumProductos[index];
+        if (index!=vecProc.length-1) {
+            insertCategoriaProducto = insertCategoriaProducto + '),';
+            insertImagenes = insertImagenes + '),';
+        }else{
+            insertCategoriaProducto = insertCategoriaProducto + ')';
+            insertImagenes = insertImagenes + ')';
+        }
+    }
+    conn.query('INSERT INTO Producto(nombre,sku,precioLista,caracteristicas,descripcion,estado) VALUES'+insertProductos+';', function (error, results, fields) {
+        if (error) {
+            console.log(error);
+            res.jsonp({ error: 'Error de conexión a la base de datos.' })
+        }
+        conn.query('INSERT INTO Categoria(nombre,descripcion,idPadre) VALUES'+insertCategoria+';', function (error2, results2, fields) {
+            if (error2) {
+                console.log(error2);
+                res.jsonp({ error2: 'Error de conexión a la base de datos.' })
+            }
+            conn.query('INSERT INTO Categoria(nombre,descripcion,idPadre) VALUES'+insertCategoriaProducto+';', function (error3, results3, fields) {
+                if (error2) {
+                    console.log(error2);
+                    res.jsonp({ error2: 'Error de conexión a la base de datos.' })
+                }
+                conn.query('INSERT INTO ProductoImagen(ruta,idProducto) VALUES'+insertCategoriaProducto+';', function (error4, results4, fields) {
+                    if (error4) {
+                        console.log(error4);
+                        res.jsonp({ error4: 'Error de conexión a la base de datos.' })
+                    }
+                    
+                });
+            });
+        });
+    });
 }
 module.exports = {
     obtenerCatalogo,
     enriquecerProducto,
     deProducto,
     periodo,
-    truncarReporte
+    truncarReporte,
+    recargarProductos
 }

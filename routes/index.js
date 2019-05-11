@@ -16,5 +16,6 @@ api.get('/PIM/enriquecerProducto/:SKUs?',auth.checkToken,productos.enriquecerPro
 api.get('/PIM/deProducto/',productos.deProducto)
 api.get('/PIM/periodo/',productos.periodo)
 api.get('/PIM/truncarReporte/',productos.truncarReporte)
+api.get('/PIM/recargarProducto/',productos.recargarProductos)
 
 module.exports = api;
